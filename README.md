@@ -1,78 +1,68 @@
-# Boilerplate Laravel 5 Package
+# Laravel Load More Pagination
 
-## Installation
+A package that will give you access to a LoadMorePagination trait where you can paginate your model's results with an initial number of items and then a different number of items on subsequent pages.
 
-Clone this repo with minimal history:
+This package does not implement any paginator interfaces or anything like that it simply returns a similar array to a paginator with the usual information such as last_page, current_page, data, etc.
 
-```sh
-git clone --depth 1 git@github.com:cviebrock/laravel5-package-template.git
+## Usage
+
+To install this package do the following:
+
+```
+composer require vitorf7/lv-loadmorepagination
 ```
 
-Rename the directory and re-init it as your own package:
+Once installed you can use this in two ways. Either by imporating this into your Eloquent Model or using it in your Controller or Repository, etc.
 
-```sh
-mv laravel5-package-template my-package
-cd my-package
-rm -rf .git
-git init
-```
+This package has an initial load of 9 items and subsequent load of 3.
 
-
-## Configuration
-
-The boilerplate files provide a scaffold for building your own package.  You'll need to make a bunch of changes to the files we've provided to make it your own.
-
-
-### composer.json
-
-Edit `composer.json` to reflect your package information.  At a minimum, you will need to change the package name and autoload lines so that "vendor/package" reflects your new package's name and namespace.
-
-```json
-{
-    "name": "vendor/package",
-    ...
-    "autoload": {
-        "psr-4": {
-            "Vendor\\Package\\": "src/"
-        }
-    },
-    ...
-},
-```
-
-
-### config/packagename.php
-
-Rename `config/packagename.php` to something more useful, like `config/my-package.php`.  This is the configuration file that Laravel will publish into it's `config` directory.  Laravel 5 doesn't use the `config/packages/vendor/...` structure that Laravel 4 did, so pick a file name that's not likely to conflict with existing configuration files.
-
-
-### src/ServiceProvider.php
-
-Open up `src/ServiceProvider.php` as well.  At a minimum you'll need to change the namespace at the top of the file (it needs to match the PSR-4 namespace you set in `composer.json`).
-
-In the `boot()` method, comment out or uncomment the components your package will need.  For example, if your package only has a configuration, then you can comment out everything except the `handleConfigs()` call:
-
+In a Model:
 ```php
-public function boot() {
-    $this->handleConfigs();
-    // $this->handleMigrations();
-    // $this->handleViews();
-    // $this->handleTranslations();
-    // $this->handleRoutes();
+<?php
+
+namespace App;
+
+use VitorF7\LoadMorePagination\LoadMorePagination;
+
+class Post extends Model
+{
+    use LoadMorePagination;
+}
+
+// in a controller action or something you can use it like so
+Post::paginateLoadMore(); // Loads 9 on first page and 3 every page after that
+Post::paginateLoadMore(8, 4); // Loads 8 on first page and 4 every page after that
+Post::paginateLoadMore(4, 4); // Loads 4 on first page and 4 every page after that. However at this point you could just simply use Post::paginate(4). This package is better used when you need to load different amount of items from the first page
+
+// You can use it after you do an eager load of relationship too. At least simple loads for now as it has not been tested with something more complex
+Post::with('categories')->paginateLoadMore();
+```
+
+If you want to use it in a Controller, Repository, etc you need to pass 3 arguments.
+- 1st Argument is the inital load of items
+- 2nd Argument is the load of subsequent items
+- 3rd Argument is the Model you are trying to paginate
+
+Like so:
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use VitorF7\LoadMorePagination\LoadMorePagination;
+
+class PostsController extends Controller
+{
+    use LoadMorePagination;
+
+    public function index()
+    {
+        $posts = $this->paginatedLoadMore(9, 3, new Post);
+
+        return view('posts.index', compact('posts'));
+    }
 }
 ```
 
-In the `handleConfigs()` method, you'll want to change the "packagename" references to the name you chose up above (in the [config/packagename.php] instructions).
-
-For the other methods, again change instances of "vendor" and "packagename" to your package's name.
-
-
-### Last Steps
-
-Update the `LICENSE` file as required (make sure it matches what you said your package's license is in `composer.json`).
-
-Finally, edit this `README.md` file and replace it with a description of your own, awesome Laravel 5 package.
-
-Commit everything to your (newly initialized) git repo, and push it wherever you'll keep your package (Github, etc.).
-
-Enjoy coding!
+If you do not pass a model you will get a ``` VitorF7\LoadMorePagination\ModelClassRequiredException```

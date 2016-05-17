@@ -4,6 +4,7 @@ namespace VitorF7\LoadMorePagination;
 
 use Illuminate\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Model;
+use VitorF7\LoadMorePagination\ModelClassRequiredException;
 
 /**
  * LoadMorePagination Trait
@@ -29,14 +30,12 @@ trait LoadMorePagination
      *
      * @return array [Array of results and pagination information]
      */
-    public function paginateLoadMore($initialQuantity = 9, $loadMore = 3, $model = null)
+    public function paginatedLoadMore($initialQuantity = 9, $loadMore = 3, $model = null)
     {
         // If no model is passed as last argument and current class is not an Eloquent Model then abort
-        abort_if(
-            ($model === null && !$this instanceof Model),
-            404,
-            'Please provide an Eloquent Model Class as the last argument or use this in an Eloquent Model Class'
-        );
+        if ($model === null && !$this instanceof Model) {
+            throw new ModelClassRequiredException;
+        }
 
         // Model is either the model passed as last argument or the Class in case it is null
         $model = $model ?: $this;
@@ -51,9 +50,9 @@ trait LoadMorePagination
         $modelResults = $model->skip($skip)->take($perPage)->get();
 
         $total = $modelCollection->count();
-        $lastPage = (int) round(($total - $initialQuantity) / $loadMore + 1);
+        $lastPage = ($total > $initialQuantity) ? (int) ceil((($total - $initialQuantity) / $loadMore) + 1) : 1;
         $from = $skip + 1;
-        $to = $skip + $perPage;
+        $to = ($total > $initialQuantity) ? $skip + $perPage : $total;
         $nextPageUrl = ($page !== $lastPage) ? (string) Paginator::resolveCurrentPath() . '?page=' . ($page + 1) : null;
         $previousPageUrl = ($page !== 1) ? (string) Paginator::resolveCurrentPath() . '?page=' . ($page - 1) : null;
 
@@ -85,6 +84,6 @@ trait LoadMorePagination
      */
     public function scopePaginateLoadMore($query, $initialQuantity = 9, $loadMore = 3, $model = null)
     {
-        return $this->paginateLoadMore($initialQuantity, $loadMore, $query);
+        return $this->paginatedLoadMore($initialQuantity, $loadMore, $query);
     }
 }

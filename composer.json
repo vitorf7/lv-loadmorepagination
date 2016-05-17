@@ -1,8 +1,7 @@
 {
-  "name": "vitorf7/loadmorepagination",
+  "name": "vitorf7/lv-loadmorepagination",
   "description": "Load More Pagination for Laravel. Allows to load an initial number of items and subsequent pages can load a different number of items",
-  "keywords": ['laravel', 'pagination', 'custom', 'load more'],
-  "homepage": "",
+  "keywords": ["laravel", "pagination", "custom", "load more"],
   "license": "MIT",
   "authors": [
     {
@@ -17,12 +16,15 @@
     "illuminate/database": "~5.0"
   },
   "require-dev": {
-    "phpunit/phpunit": "~4.0"
+    "phpunit/phpunit": "^5.3"
   },
   "autoload": {
     "psr-4": {
       "VitorF7\\LoadMorePagination\\": "src/"
     }
+  },
+  "autoload-dev": {
+    "classmap": ["tests/TestCase.php"]   
   },
   "minimum-stability": "dev"
 }
