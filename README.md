@@ -1,5 +1,7 @@
 # Laravel Load More Pagination
 
+[![Build Status](https://travis-ci.org/vitorf7/lv-loadmorepagination.svg?branch=master)](https://travis-ci.org/vitorf7/lv-loadmorepagination)
+
 A package that will give you access to a LoadMorePagination trait where you can paginate your model's results with an initial number of items and then a different number of items on subsequent pages.
 
 This package does not implement any paginator interfaces or anything like that it simply returns a similar array to a paginator with the usual information such as last_page, current_page, data, etc.
