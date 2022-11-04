@@ -44,12 +44,11 @@ trait LoadMorePagination
         $perPage = ($page == 1) ? $initialQuantity : $loadMore;
         $skip = ($page == 1) ? 0 : ($initialQuantity + ($loadMore * ($page - 2)));
 
-        // Get a full collection to be able to calculate the full total all the time
-        $modelCollection = $model->get();
+        // Don't get the full collection in order to save PHP memory. Get count() directly from the model to get full total
+        $total = $model->count();
         // Get the correct results
         $modelResults = $model->skip($skip)->take($perPage)->get();
 
-        $total = $modelCollection->count();
         $lastPage = ($total > $initialQuantity) ? (int) ceil((($total - $initialQuantity) / $loadMore) + 1) : 1;
         $from = $skip + 1;
         $to = ($total > $initialQuantity) ? $skip + $perPage : $total;
